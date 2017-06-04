@@ -33,7 +33,62 @@ To start a new training: Python Manager.py -c train -d cfg/voc.data -n yolo-voc.
 To start a fine-tuned training with a pre-trained weight: Python Manager.py -c train -d cfg/voc.data -n yolo-voc.cfg -w yolo.weights
 
 # Use Case 3 #
-To resume a training: Python Manager.py -c train -i 20170604142745739
+To resume a training: Python Manager.py -c train -i 20170604194957193
 
-> "20170604142745739" is the ID of the training task you want to resume. You can find it in the job folder.
+> "20170604194957193" is the ID of the training task you want to resume. You can find it in the job folder.
 
+# Tree of job folder #
+```
+.
+|-- 20170604194957193
+|   |-- backup
+|   |   |-- tiny-yolo-voc-64-8-001_100.weights
+|   |   `-- tiny-yolo-voc-64-8-001_200.weights
+|   |-- cfg
+|   |   |-- tiny-yolo-voc-64-8-001.cfg
+|   |   |-- union-eg.data
+|   |   `-- voc-eg.names
+|   |-- PathSetting.json
+|   |-- train_data
+|   |   |-- 2007_test.txt
+|   |   `-- train_union.txt
+|   |-- train.run
+|   `-- yolo
+|       |-- cfg
+|       |-- darknet
+|       |-- data
+|       |-- .git
+|       |-- .gitignore
+|       |-- LICENSE
+|       |-- Makefile
+|       |-- obj
+|       |-- README.md
+|       |-- results
+|       |-- scripts
+|       `-- src
+`-- 20170604203612931
+    |-- backup
+    |   `-- yolo-voc_100.weights
+    |-- cfg
+    |   |-- voc.data
+    |   |-- voc.names
+    |   `-- yolo-voc.cfg
+    |-- PathSetting.json
+    |-- train_data
+    |   |-- 2007_val.txt
+    |   `-- train.all.txt
+    |-- train.run
+    `-- yolo
+        |-- backup
+        |-- cfg
+        |-- darknet
+        |-- data
+        |-- .git
+        |-- .gitignore
+        |-- LICENSE
+        |-- Makefile
+        |-- obj
+        |-- README.md
+        |-- results
+        |-- scripts
+        `-- src
