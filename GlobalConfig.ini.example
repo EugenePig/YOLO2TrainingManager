@@ -1,0 +1,3 @@
+﻿[GLOBAL]
+YOLO_ROOT_PATH=/home/nvidia/yolo2/darknet
+JOB_ROOT_PATH=/media/nvidia/480E0A5A0E0A4204/job
