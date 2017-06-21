@@ -101,6 +101,7 @@ def process_cfg(path_dic):
     modify_cfg_props(props, 'train', path_dic['data_cfg_path'], path_dic['train_data_folder'])
     modify_cfg_props(props, 'valid', path_dic['data_cfg_path'], path_dic['train_data_folder'])
     modify_cfg_props(props, 'names', path_dic['data_cfg_path'], path_dic['cfg_folder'])
+    modify_cfg_props(props, 'labels', path_dic['data_cfg_path'], path_dic['cfg_folder'])
     path_dic['backup_folder'] =os.path.join(path_dic['job_folder'], BACKUP_FOLDER_NAME)
     check_dir(path_dic['backup_folder'], True)
     props['backup'] = path_dic['backup_folder']
@@ -126,7 +127,7 @@ def read_yolo_config(path, sep_cahr='=', comment_char='#'):
     return props
 
 
-def modify_cfg_props(props, key, cfg_path, copy_dest_folder):
+def modify_cfg_props(props, key, cfg_path, copy_dest_folder, needed = True):
     if props.has_key(key):
         value = props.get(key)
         if not os.path.isabs(value):
@@ -138,7 +139,7 @@ def modify_cfg_props(props, key, cfg_path, copy_dest_folder):
             new_value = os.path.join(copy_dest_folder, os.path.basename(value))
             shutil.copy2(value, new_value)
             props[key] = new_value
-    else:
+    elif needed:
         print 'The setting of {} does exist in {}'.format(key, cfg_path)
         sys.exit(1)
 
