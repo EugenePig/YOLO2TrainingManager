@@ -1,6 +1,10 @@
-import os, sys, codecs, ConfigParser, getopt, random, shutil, tarfile, json
+import os, sys, codecs, getopt, random, shutil, tarfile, json, six
 from datetime import datetime
 import Train
+try:
+    import configparser
+except:
+    from six.moves import configparser
 
 
 __author__ = "Eugene Su"
@@ -18,23 +22,26 @@ def read_global_conf():
     SECTION_NAME = 'GLOBAL'
     YOLO_ROOT_OPTION = 'YOLO_ROOT_PATH'
     JOB_ROOT_OPTION = 'JOB_ROOT_PATH'
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.ConfigParser()
     config.optionxform = str
-    config.readfp(codecs.open(FILE_NAME, 'r', 'utf-8-sig'))
+    if six.PY2:
+        config.readfp(codecs.open(FILE_NAME, 'r', 'utf-8-sig'))
+    else:
+        config.read_file(codecs.open(FILE_NAME, 'r', 'utf-8-sig'))
     global YOLO_ROOT, JOB_ROOT
     if config.has_section(SECTION_NAME):
         if config.has_option(SECTION_NAME, YOLO_ROOT_OPTION):
             YOLO_ROOT = os.path.abspath(config.get(SECTION_NAME, YOLO_ROOT_OPTION))
         else:
-            print 'Please set {} in {}'.format(YOLO_ROOT_OPTION, FILE_NAME)
+            print ('Please set {} in {}'.format(YOLO_ROOT_OPTION, FILE_NAME))
             sys.exit(1)
         if config.has_option(SECTION_NAME, JOB_ROOT_OPTION):
             JOB_ROOT = os.path.abspath(config.get(SECTION_NAME, JOB_ROOT_OPTION))
         else:
-            print 'Please set {} in {}'.format(JOB_ROOT_OPTION, FILE_NAME)
+            print ('Please set {} in {}'.format(JOB_ROOT_OPTION, FILE_NAME))
             sys.exit(1)
     else:
-        print 'Please set {} and {} in {}'.format(YOLO_ROOT_OPTION, JOB_ROOT_OPTION, FILE_NAME)
+        print ('Please set {} and {} in {}'.format(YOLO_ROOT_OPTION, JOB_ROOT_OPTION, FILE_NAME))
         sys.exit(1)
 
     if DEBUG:
@@ -46,22 +53,22 @@ def read_global_conf():
 
 def check_dir(path, isCreat=False):
     if DEBUG:
-        print 'Checking PATH: {}'.format(path)
+        print ('Checking PATH: {}'.format(path))
 
     if not os.path.exists(path):
         if isCreat:
             os.makedirs(path)
         else:
-            print 'PATH {} does not exist'.format(path)
+            print ('PATH {} does not exist'.format(path))
             sys.exit(1)
     else:
         if not os.path.isdir(path):
-            print 'PATH {} is not a folder'.format(path)
+            print ('PATH {} is not a folder'.format(path))
             sys.exit(1)
 
 
 def copy_tree(src, dst, symlinks=False, ignore=None):
-    print 'Copying {} to {}'.format(src, dst)
+    print ('Copying {} to {}'.format(src, dst))
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
@@ -69,8 +76,7 @@ def copy_tree(src, dst, symlinks=False, ignore=None):
             shutil.copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
-    print 'Copy finished'
-
+    print ('Copy finished')
 
 def tar_tree(src, dst):
     tar = tarfile.open(dst, 'w')
@@ -101,12 +107,12 @@ def process_cfg(path_dic):
     modify_cfg_props(props, 'train', path_dic['data_cfg_path'], path_dic['train_data_folder'])
     modify_cfg_props(props, 'valid', path_dic['data_cfg_path'], path_dic['train_data_folder'])
     modify_cfg_props(props, 'names', path_dic['data_cfg_path'], path_dic['cfg_folder'])
-    modify_cfg_props(props, 'labels', path_dic['data_cfg_path'], path_dic['cfg_folder'])
+    modify_cfg_props(props, 'labels', path_dic['data_cfg_path'], path_dic['cfg_folder'], False)
     path_dic['backup_folder'] =os.path.join(path_dic['job_folder'], BACKUP_FOLDER_NAME)
     check_dir(path_dic['backup_folder'], True)
     props['backup'] = path_dic['backup_folder']
     if DEBUG:
-        print 'data_cfg_props: {}'.format(props)
+        print ('data_cfg_props: {}'.format(props))
 
     with open(path_dic['new_data_cfg_path'], 'w') as f:
         for key, value in props.items() :
@@ -133,14 +139,14 @@ def modify_cfg_props(props, key, cfg_path, copy_dest_folder, needed = True):
         if not os.path.isabs(value):
             value = os.path.join(YOLO_ROOT, value)
         if not os.path.exists(value):
-            print 'The setting of {} [{}]is wrong in {}'.format(key, value, cfg_path)
+            print ('The setting of {} [{}]is wrong in {}'.format(key, value, cfg_path))
             sys.exit(1)
         else:
             new_value = os.path.join(copy_dest_folder, os.path.basename(value))
             shutil.copy2(value, new_value)
             props[key] = new_value
     elif needed:
-        print 'The setting of {} does exist in {}'.format(key, cfg_path)
+        print ('The setting of {} does exist in {}'.format(key, cfg_path))
         sys.exit(1)
 
 
@@ -156,7 +162,7 @@ def save_dic(dic, path):
         with open(path, 'w') as f:
             json.dump(dic, f)
     except (OSError, IOError) as e:
-        print e
+        print (e)
         sys.exit(1)
 
 
@@ -166,7 +172,7 @@ def load_dic(path):
             dic = json.load(f)
         return dic
     except (OSError, IOError) as e:
-        print e
+        print (e)
         sys.exit(1)
 
 
@@ -185,20 +191,20 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, 'hc:i:d:n:w:', ['cmd=', 'id=', 'data_cfg=', 'net_cfg=', 'weight='])
     except getopt.GetoptError:
-        print USAGE_MSG
+        print (USAGE_MSG)
         sys.exit(2)
     if DEBUG:
-        print 'opts: {}' .format(opts)
+        print ('opts: {}' .format(opts))
 
     for opt, arg in opts:
         if opt == '-h':
-            print USAGE_MSG
+            print (USAGE_MSG)
             sys.exit()
         elif opt in ('-c', '--cmd'):
             cmd = arg
             if not cmd in CMD_SET:
-                print USAGE_MSG
-                print 'unknown command: {}'.format(cmd)
+                print (USAGE_MSG)
+                print ('unknown command: {}'.format(cmd))
                 sys.exit(1)
         elif opt in ('-i', '--id'):
             id = arg
@@ -220,40 +226,40 @@ def main(argv):
                 weight_file = os.path.join(YOLO_ROOT, arg)
 
     if cmd is None:
-        print USAGE_MSG
-        print 'command is necessary'
+        print (USAGE_MSG)
+        print ('command is necessary')
         sys.exit(1)
 
     if id is None:
         if path_dic['data_cfg_path'] is None:
-            print USAGE_MSG
-            print 'training data cfg is necessary'
+            print (USAGE_MSG)
+            print ('training data cfg is necessary')
             sys.exit(1)
 
         if path_dic['net_cfg_path'] is None:
-            print USAGE_MSG
-            print 'network cfg is necessary'
+            print (USAGE_MSG)
+            print ('network cfg is necessary')
             sys.exit(1)
 
         if DEBUG:
-            print 'training data cfg is {}'.format(path_dic['data_cfg_path'])
+            print ('training data cfg is {}'.format(path_dic['data_cfg_path']))
 
         if not os.path.exists(path_dic['data_cfg_path']):
-            print 'training data cfg: {} does not exist'.format(path_dic['data_cfg_path'])
+            print ('training data cfg: {} does not exist'.format(path_dic['data_cfg_path']))
             sys.exit(1)
 
         if DEBUG:
-            print 'network cfg is {}'.format(path_dic['net_cfg_path'])
+            print ('network cfg is {}'.format(path_dic['net_cfg_path']))
 
         if not os.path.exists(path_dic['net_cfg_path']):
-            print 'network cfg: {} does not exist'.format(path_dic['net_cfg_path'])
+            print ('network cfg: {} does not exist'.format(path_dic['net_cfg_path']))
             sys.exit(1)
 
         check_dir(JOB_ROOT, True)
         # generate an unique ID
         id = datetime.now().strftime('%Y%m%d%H%M%S') + str(random.randint(1, 1000)).zfill(3)
         if DEBUG:
-            print 'ID is {}'.format(id)
+            print ('ID is {}'.format(id))
 
         path_dic['job_folder'] = os.path.join(JOB_ROOT, id)
         check_dir(path_dic['job_folder'], True)
@@ -269,18 +275,18 @@ def main(argv):
 
         makefile = find_file(path_dic['yolo_folder'], 'Makefile')
         if  makefile is None:
-            print 'Can not find Makefile in {}'.format(path_dic['yolo_folder'])
+            print ('Can not find Makefile in {}'.format(path_dic['yolo_folder']))
             sys.exit(1)
         path_dic['makefile_folder'] = os.path.dirname(makefile)
         if DEBUG:
-            print 'Makefile is in {}'.format(path_dic['makefile_folder'])
+            print ('Makefile is in {}'.format(path_dic['makefile_folder']))
 
         save_dic(path_dic, os.path.join(path_dic['job_folder'], FILE_NAME))
     else:
         weight_file = None
         path_dic = load_dic(os.path.join(JOB_ROOT, id, FILE_NAME))
         if DEBUG:
-            print 'path_dic: {}'.format(path_dic)
+            print ('path_dic: {}'.format(path_dic))
 
         data_cfg_props = read_yolo_config(path_dic['data_cfg_path'])
 
