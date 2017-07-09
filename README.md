@@ -12,7 +12,7 @@ YOLO2TrainingManager is a Python script tool to wrap [YOLO2](https://pjreddie.co
 Both of YOLO\_ROOT\_PATH and JOB\_ROOT\_PATH support absolute and relative path. They are relative to the location of Manager.py 
 
 # Usage #
-Usage: Manager.py [OPTION]
+Usage: Manager.py <detector/classifier> [OPTION]
 
 -c, --cmd &nbsp;&nbsp;&nbsp; **command: train, recall, report**
 
@@ -27,13 +27,13 @@ Usage: Manager.py [OPTION]
 All options support absolute and relative path. They are relative to YOLO\_ROOT\_PATH
 
 # Use Case 1 #
-To start a new training: Python Manager.py -c train -d cfg/voc.data -n yolo-voc.cfg
+To start a new training: Python Manager.py <detector/classifier> -c train -d cfg/voc.data -n yolo-voc.cfg
 
 # Use Case 2 #
-To start a fine-tuned training with a pre-trained weight: Python Manager.py -c train -d cfg/voc.data -n yolo-voc.cfg -w yolo.weights
+To start a fine-tuned training with a pre-trained weight: Python Manager.py <detector/classifier> -c train -d cfg/voc.data -n yolo-voc.cfg -w yolo.weights
 
 # Use Case 3 #
-To resume a training: Python Manager.py -c train -i 20170604194957193
+To resume a training: Python Manager.py <detector/classifier> -c train -i 20170604194957193
 
 > "20170604194957193" is the ID of the training task you want to resume. You can find it in the job folder.
 
